@@ -96,7 +96,7 @@ foreach my $filename (@files_for_processing) {
 			else {
 				$anon_ip = $serial_num_for_ip->{$ip};
 			}
-			$id = "$anon_ip.$id_part";
+			$id = "$anon_ip";
 		}
 		# if it's a search results page, we need to record the search query (in an array of search queries)
 		# the search query is stored in an attribute called _q or _aq
