@@ -98,23 +98,6 @@ foreach my $filename (@files_for_processing) {
 			}
 			$id = "$anon_ip";
 		}
-		# if it's a search results page, we need to record the search query (in an array of search queries)
-		# the search query is stored in an attribute called _q or _aq
-		if ($tokens[6] =~ m|/results/r|i) {
-			my $query;
-			if (defined $fields{_q}) {
-				$query = $fields{_q};
-			}
-			elsif (defined $fields{_aq}) {
-				$query = $fields{_aq};
-			}
-			else {
-				next;
-			}
-			$query = URL::Encode::url_decode($query);
-			$data->{ $id }{most_recent_search} = $query; # keep track of the most recent search term, to relate back any subsequent IA views
-			$data->{ $id }{searches}{$query}{search_count}++; # keep track of the search queries (this could be an array but I'm using a hash to automatically de-dupe)
-		}
 		
 		# if it's a details page, get the series reference
 		if ($tokens[6] =~ m|/details/r|i) {
@@ -132,17 +115,7 @@ foreach my $filename (@files_for_processing) {
 				if (!defined($data->{ $id })) {
 					$data->{ $id }{first_series} = $series_ref;
 				}
-				# if there's a recent search term, log any IA views against it. Otherwise just log them without a search term (might still be useful to learn related series)
-				if (defined($data->{ $id }{"most_recent_search"})) {
-					my $mrs = $data->{ $id }{"most_recent_search"};
-					$data->{ $id }{searches}{$mrs}{series_opened}{$series_ref}++;
-					if (!defined $data->{ $id }{searches}{$mrs}{first_series}) {
-						$data->{ $id }{searches}{$mrs}{first_series} = $series_ref;
-					}
-				}
-				else {
-					$data->{ $id }{series_opened}{$series_ref}++;
-				}
+				$data->{ $id }{series_opened}{$series_ref}++;
 			}
 		}
 	}
